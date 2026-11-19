@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: emergency-secrets
+  namespace: emergency
+stringData:
+  RABBITMQ_URL: amqp://emergency:emergency@rabbitmq:5672/
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emergency-config
+  namespace: emergency
+data:
+  MONGO_DB: emergency
+  MATCHING_RADIUS_KM: "100"
