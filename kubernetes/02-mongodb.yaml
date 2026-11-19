@@ -6,7 +6,7 @@ metadata:
   namespace: emergency
 spec:
   serviceName: mongo-rs0
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: mongo-rs0
@@ -63,7 +63,7 @@ metadata:
   namespace: emergency
 spec:
   serviceName: mongo-rs1
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: mongo-rs1
@@ -120,7 +120,7 @@ metadata:
   namespace: emergency
 spec:
   serviceName: mongo-rs2
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: mongo-rs2

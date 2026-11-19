@@ -3,14 +3,15 @@ services:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: emergency
-      RABBITMQ_DEFAULT_PASS: emergency
-    ports: ["5672:5672", "15672:15672"]
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?Set RABBITMQ_USER in .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+    ports: ["${RABBITMQ_PORT:-5672}:5672", "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"]
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
+      
   mongo00: &mongo
     image: mongo:7.0
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
@@ -25,6 +26,11 @@ services:
     <<: *mongo
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes: [mongo01-data:/data/db]
+  mongo02:
+    <<: *mongo
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes: [mongo02-data:/data/db]
+
   mongo10:
     <<: *mongo
     command: ["mongod", "--replSet", "rs1", "--bind_ip_all"]
@@ -33,6 +39,11 @@ services:
     <<: *mongo
     command: ["mongod", "--replSet", "rs1", "--bind_ip_all"]
     volumes: [mongo11-data:/data/db]
+  mongo12:
+    <<: *mongo
+    command: ["mongod", "--replSet", "rs1", "--bind_ip_all"]
+    volumes: [mongo12-data:/data/db]
+
   mongo20:
     <<: *mongo
     command: ["mongod", "--replSet", "rs2", "--bind_ip_all"]
@@ -41,49 +52,71 @@ services:
     <<: *mongo
     command: ["mongod", "--replSet", "rs2", "--bind_ip_all"]
     volumes: [mongo21-data:/data/db]
+  mongo22:
+    <<: *mongo
+    command: ["mongod", "--replSet", "rs2", "--bind_ip_all"]
+    volumes: [mongo22-data:/data/db]
+
   replica-init:
     image: mongo:7.0
     depends_on:
       mongo00: {condition: service_healthy}
       mongo01: {condition: service_healthy}
+      mongo02: {condition: service_healthy}
       mongo10: {condition: service_healthy}
       mongo11: {condition: service_healthy}
+      mongo12: {condition: service_healthy}
       mongo20: {condition: service_healthy}
       mongo21: {condition: service_healthy}
+      mongo22: {condition: service_healthy}
+      
     volumes: [./database/initialization:/scripts:ro]
     entrypoint: ["/bin/bash", "/scripts/init-replica-sets.sh"]
+
   api:
     build: ./backend
     environment:
-      MONGO_SHARD0_URI: mongodb://mongo00:27017,mongo01:27017/?replicaSet=rs0
-      MONGO_SHARD1_URI: mongodb://mongo10:27017,mongo11:27017/?replicaSet=rs1
-      MONGO_SHARD2_URI: mongodb://mongo20:27017,mongo21:27017/?replicaSet=rs2
-      RABBITMQ_URL: amqp://emergency:emergency@rabbitmq:5672/
-    ports: ["8000:8000"]
+      MONGO_DB: ${MONGO_DB:-emergency}
+      MONGO_SHARD0_URI: ${MONGO_SHARD0_URI:?Set MONGO_SHARD0_URI in .env}
+      MONGO_SHARD1_URI: ${MONGO_SHARD1_URI:?Set MONGO_SHARD1_URI in .env}
+      MONGO_SHARD2_URI: ${MONGO_SHARD2_URI:?Set MONGO_SHARD2_URI in .env}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:?Set RABBITMQ_USER in .env}:${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}@rabbitmq:5672/
+      MATCHING_RADIUS_KM: ${MATCHING_RADIUS_KM:-100}
+      HEARTBEAT_TIMEOUT_SECONDS: ${HEARTBEAT_TIMEOUT_SECONDS:-30}
+    ports: ["${API_PORT:-8000}:8000"]
     depends_on:
       replica-init: {condition: service_completed_successfully}
       rabbitmq: {condition: service_healthy}
     restart: unless-stopped
+
   matching-worker:
     build: ./backend
     command: ["--spring.main.web-application-type=none", "--app.role=worker"]
     environment:
-      MONGO_SHARD0_URI: mongodb://mongo00:27017,mongo01:27017/?replicaSet=rs0
-      MONGO_SHARD1_URI: mongodb://mongo10:27017,mongo11:27017/?replicaSet=rs1
-      MONGO_SHARD2_URI: mongodb://mongo20:27017,mongo21:27017/?replicaSet=rs2
-      RABBITMQ_URL: amqp://emergency:emergency@rabbitmq:5672/
+      MONGO_DB: ${MONGO_DB:-emergency}
+      MONGO_SHARD0_URI: ${MONGO_SHARD0_URI:?Set MONGO_SHARD0_URI in .env}
+      MONGO_SHARD1_URI: ${MONGO_SHARD1_URI:?Set MONGO_SHARD1_URI in .env}
+      MONGO_SHARD2_URI: ${MONGO_SHARD2_URI:?Set MONGO_SHARD2_URI in .env}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:?Set RABBITMQ_USER in .env}:${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}@rabbitmq:5672/
+      MATCHING_RADIUS_KM: ${MATCHING_RADIUS_KM:-100}
+      HEARTBEAT_TIMEOUT_SECONDS: ${HEARTBEAT_TIMEOUT_SECONDS:-30}
     depends_on:
       replica-init: {condition: service_completed_successfully}
       rabbitmq: {condition: service_healthy}
     restart: unless-stopped
+
   frontend:
     build: ./frontend
-    ports: ["5173:80"]
+    ports: ["${FRONTEND_PORT:-5173}:80"]
     depends_on: [api]
+
 volumes:
   mongo00-data: {}
   mongo01-data: {}
+  mongo02-data: {}
   mongo10-data: {}
   mongo11-data: {}
+  mongo12-data: {}
   mongo20-data: {}
   mongo21-data: {}
+  mongo22-data: {}
