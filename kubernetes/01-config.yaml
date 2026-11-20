@@ -3,8 +3,11 @@ kind: Secret
 metadata:
   name: emergency-secrets
   namespace: emergency
+type: Opaque
 stringData:
-  RABBITMQ_URL: amqp://emergency:emergency@rabbitmq:5672/
+  RABBITMQ_USER: "${RABBITMQ_USER}"
+  RABBITMQ_PASSWORD: "${RABBITMQ_PASSWORD}"
+  RABBITMQ_URL: "${K8S_RABBITMQ_URL}"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -12,5 +15,9 @@ metadata:
   name: emergency-config
   namespace: emergency
 data:
-  MONGO_DB: emergency
-  MATCHING_RADIUS_KM: "100"
+  MONGO_DB: "${MONGO_DB}"
+  MONGO_SHARD0_URI: "${K8S_MONGO_SHARD0_URI}"
+  MONGO_SHARD1_URI: "${K8S_MONGO_SHARD1_URI}"
+  MONGO_SHARD2_URI: "${K8S_MONGO_SHARD2_URI}"
+  MATCHING_RADIUS_KM: "${MATCHING_RADIUS_KM}"
+  HEARTBEAT_TIMEOUT_SECONDS: "${HEARTBEAT_TIMEOUT_SECONDS}"

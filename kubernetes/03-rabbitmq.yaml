@@ -21,9 +21,15 @@ spec:
             - containerPort: 15672
           env:
             - name: RABBITMQ_DEFAULT_USER
-              value: emergency
+              valueFrom:
+                secretKeyRef:
+                  name: emergency-secrets
+                  key: RABBITMQ_USER
             - name: RABBITMQ_DEFAULT_PASS
-              value: emergency
+              valueFrom:
+                secretKeyRef:
+                  name: emergency-secrets
+                  key: RABBITMQ_PASSWORD
           readinessProbe:
             exec:
               command:
@@ -43,5 +49,7 @@ spec:
   ports:
     - name: amqp
       port: 5672
+      targetPort: 5672
     - name: management
       port: 15672
+      targetPort: 15672

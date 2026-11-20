@@ -25,13 +25,6 @@ spec:
                 name: emergency-config
             - secretRef:
                 name: emergency-secrets
-          env:
-            - name: MONGO_SHARD0_URI
-              value: "mongodb://mongo-rs0-0.mongo-rs0:27017,mongo-rs0-1.mongo-rs0:27017/?replicaSet=rs0"
-            - name: MONGO_SHARD1_URI
-              value: "mongodb://mongo-rs1-0.mongo-rs1:27017,mongo-rs1-1.mongo-rs1:27017/?replicaSet=rs1"
-            - name: MONGO_SHARD2_URI
-              value: "mongodb://mongo-rs2-0.mongo-rs2:27017,mongo-rs2-1.mongo-rs2:27017/?replicaSet=rs2"
           startupProbe:
             httpGet:
               path: /health
@@ -100,10 +93,17 @@ spec:
                 name: emergency-config
             - secretRef:
                 name: emergency-secrets
-          env:
-            - name: MONGO_SHARD0_URI
-              value: "mongodb://mongo-rs0-0.mongo-rs0:27017,mongo-rs0-1.mongo-rs0:27017/?replicaSet=rs0"
-            - name: MONGO_SHARD1_URI
-              value: "mongodb://mongo-rs1-0.mongo-rs1:27017,mongo-rs1-1.mongo-rs1:27017/?replicaSet=rs1"
-            - name: MONGO_SHARD2_URI
-              value: "mongodb://mongo-rs2-0.mongo-rs2:27017,mongo-rs2-1.mongo-rs2:27017/?replicaSet=rs2"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          # env:
+          #   - name: MONGO_SHARD0_URI
+          #     value: "mongodb://mongo-rs0-0.mongo-rs0:27017,mongo-rs0-1.mongo-rs0:27017,mongo-rs0-2.mongo-rs0:27017/?replicaSet=rs0"
+          #   - name: MONGO_SHARD1_URI
+          #     value: "mongodb://mongo-rs1-0.mongo-rs1:27017,mongo-rs1-1.mongo-rs1:27017,mongo-rs1-2.mongo-rs1:27017/?replicaSet=rs1"
+          #   - name: MONGO_SHARD2_URI
+          #     value: "mongodb://mongo-rs2-0.mongo-rs2:27017,mongo-rs2-1.mongo-rs2:27017,mongo-rs2-2.mongo-rs2:27017/?replicaSet=rs2"
