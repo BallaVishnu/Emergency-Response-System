@@ -13,6 +13,13 @@ spec:
       labels:
         app: rabbitmq
     spec:
+      initContainers:
+        - name: prepare-rabbitmq-data
+          image: busybox:1.36
+          command: ["sh", "-c", "chown -R 999:999 /var/lib/rabbitmq"]
+          volumeMounts:
+            - name: rabbitmq-data
+              mountPath: /var/lib/rabbitmq
       containers:
         - name: rabbitmq
           image: rabbitmq:3.13-management
@@ -37,6 +44,12 @@ spec:
                 - -q
                 - ping
             periodSeconds: 10
+          volumeMounts:
+            - name: rabbitmq-data
+              mountPath: /var/lib/rabbitmq
+      volumes:
+        - name: rabbitmq-data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

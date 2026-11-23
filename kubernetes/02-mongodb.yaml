@@ -49,6 +49,7 @@ metadata:
   namespace: emergency
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: mongo-rs0
   ports:
@@ -106,6 +107,7 @@ metadata:
   namespace: emergency
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: mongo-rs1
   ports:
@@ -163,6 +165,7 @@ metadata:
   namespace: emergency
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: mongo-rs2
   ports:
