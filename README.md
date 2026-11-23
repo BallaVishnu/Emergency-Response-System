@@ -134,16 +134,9 @@ Tests cover sharding, closest-resource matching, reservation failures, saga comp
 
 Rebuild a single service: `docker compose up --build api matching-worker` (or `frontend`), or `./scripts/rebuild-backend.sh` / `./scripts/rebuild-frontend.sh` on Minikube.
 
-## Fault Tolerance Demos
+## Fault Tolerance Demonstration
 
-```bash
-# Kill a worker; Kubernetes replaces it
-kubectl -n emergency delete pod -l app=matching-worker
-
-# Kill a MongoDB member; the replica set elects a new primary if needed
-kubectl -n emergency delete pod mongo-rs0-0
-kubectl -n emergency exec mongo-rs0-1 -- mongosh --quiet --eval 'rs.status()'
-```
+Manual pod-failure and recovery steps in [Fault tolerance.md](Fault%20tolerance.md) helps demonstrate Kubernetes pod recovery and MongoDB replica-set availability during component failures.
 
 ## Repository Layout
 
